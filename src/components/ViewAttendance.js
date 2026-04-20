@@ -69,8 +69,8 @@ const ViewAttendance = ({ students }) => {
             <tbody>
               {viewRecords.map((record) => (
                 <tr key={record.id}>
-                  <td className="font-bold">{record.studentName}</td>
-                  <td className="text-center">
+                  <td className="font-bold" data-label="Student Name">{record.studentName}</td>
+                  <td className="text-center" data-label="Status">
                     <span className={`badge ${record.status === "Present" ? "badge-success" : "badge-danger"}`}>
                       {record.status}
                     </span>

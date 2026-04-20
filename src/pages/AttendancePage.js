@@ -21,7 +21,7 @@ const AttendancePage = ({ attendanceData }) => {
         <tbody>
           {attendanceData.map((record, index) => (
             <tr key={record.id || index}>
-              <td className="font-bold">
+              <td className="font-bold" data-label="Date">
                 {new Date(record.date).toLocaleDateString(undefined, { 
                   weekday: 'short', 
                   year: 'numeric', 
@@ -29,7 +29,7 @@ const AttendancePage = ({ attendanceData }) => {
                   day: 'numeric' 
                 })}
               </td>
-              <td>
+              <td data-label="Status">
                 <span className={`badge ${record.status === "Present" ? "badge-success" : "badge-danger"}`}>
                   {record.status}
                 </span>

@@ -428,11 +428,11 @@ const AdminDashboard = () => {
 
                   return (
                     <tr key={faculty.id}>
-                      <td className="font-bold">{faculty.name}</td>
-                      <td className="text-center">
+                      <td className="font-bold" data-label="Faculty Name">{faculty.name}</td>
+                      <td className="text-center" data-label="Mark Attendance">
                         {renderFacultyAction(faculty.id)}
                       </td>
-                      <td className="text-center font-bold">
+                      <td className="text-center font-bold" data-label="Summary (Current Month)">
                         {presentDays} / {daysInCurrentMonthPassed}
                       </td>
                     </tr>

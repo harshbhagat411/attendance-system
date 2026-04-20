@@ -279,9 +279,9 @@ const FacultyDashboard = () => {
                   <tbody>
                     {students.map((student) => (
                       <tr key={student.id}>
-                        <td className="font-bold">{student.name}</td>
-                        <td className="text-muted">{student.email}</td>
-                        <td className="text-center">
+                        <td className="font-bold" data-label="Student Name">{student.name}</td>
+                        <td className="text-muted" data-label="Email">{student.email}</td>
+                        <td className="text-center" data-label="Action">
                           {renderAction(student.id)}
                         </td>
                       </tr>

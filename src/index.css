@@ -347,4 +347,73 @@ hr.divider {
   .card {
     padding: 1.5rem;
   }
+
+  /* Make flex containers stack */
+  .flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Full width buttons on mobile */
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-actions .btn {
+    margin-bottom: 0;
+  }
+
+  /* Convert tables to cards */
+  .table-container {
+    border: none;
+    background: transparent;
+  }
+
+  .modern-table thead {
+    display: none;
+  }
+  
+  .modern-table, .modern-table tbody, .modern-table tr, .modern-table td {
+    display: block;
+    width: 100%;
+  }
+  
+  .modern-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .modern-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right !important;
+    border-bottom: 1px solid #eee;
+    padding: 0.8rem 0.5rem;
+  }
+  
+  .modern-table td:last-child {
+    border-bottom: none;
+  }
+  
+  .modern-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: left;
+    margin-right: 1rem;
+  }
 }
