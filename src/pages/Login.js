@@ -88,7 +88,7 @@ const Login = ({ session, role }) => {
       padding: '2rem'
     }}>
       <div className="card" style={{ width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-        <h2 className="section-title text-center" style={{ marginBottom: "2rem" }}>Attendance System</h2>
+        <h2 className="section-title text-center" style={{ marginBottom: "2rem" }}>Cloud based Attendance System</h2>
         
         {error && (
           <div className="alert alert-danger">
