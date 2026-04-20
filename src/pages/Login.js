@@ -127,7 +127,7 @@ const Login = ({ session, role }) => {
             disabled={loading}
             style={{ padding: "0.8rem", marginTop: "0.5rem" }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "LOG IN"}
           </button>
         </form>
       </div>
