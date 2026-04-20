@@ -10,10 +10,234 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Faculty Attendance State
+  const todayDateObj = new Date();
+  const offset = todayDateObj.getTimezoneOffset() * 60000;
+  const localISOTime = (new Date(todayDateObj.getTime() - offset)).toISOString().slice(0, 10);
+  const today = localISOTime;
+  const firstDayOfMonth = today.substring(0, 8) + '01';
+  const daysInCurrentMonthPassed = parseInt(today.substring(8, 10), 10);
+
+  const [faculties, setFaculties] = useState([]);
+  const [facultyDate, setFacultyDate] = useState(today);
+  const [facultyAttendanceData, setFacultyAttendanceData] = useState({});
+  const [facultyEditModes, setFacultyEditModes] = useState({});
+  const [facultySummary, setFacultySummary] = useState({});
+  const [facLoading, setFacLoading] = useState(true);
+
   useEffect(() => {
     // Initialize emailjs with the public key on component mount
     emailjs.init("2Tz2HiRHn5-2jaLxY");
   }, []);
+  useEffect(() => {
+    fetchFaculties();
+  }, []);
+
+  useEffect(() => {
+    if (faculties.length > 0) {
+      fetchFacultyAttendance();
+      fetchFacultySummary();
+    }
+  }, [facultyDate, faculties]);
+
+  const fetchFaculties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("role", "faculty")
+        .order("name");
+
+      if (error) throw error;
+      setFaculties(data || []);
+    } catch (error) {
+      console.error("Error fetching faculties:", error.message);
+    } finally {
+      setFacLoading(false);
+    }
+  };
+
+  const fetchFacultyAttendance = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("faculty_attendance")
+        .select("*")
+        .eq("date", facultyDate);
+      
+      if (error) throw error;
+      
+      const attendanceMap = {};
+      if (data) {
+        data.forEach(record => {
+          attendanceMap[record.faculty_id] = record;
+        });
+      }
+      setFacultyAttendanceData(attendanceMap);
+    } catch (error) {
+      console.error("Error fetching faculty attendance:", error.message);
+    }
+  };
+
+  const fetchFacultySummary = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("faculty_attendance")
+        .select("*")
+        .gte("date", firstDayOfMonth)
+        .lte("date", today)
+        .eq("status", "Present");
+
+      if (error) throw error;
+
+      const summaryMap = {};
+      if (data) {
+        data.forEach(record => {
+          summaryMap[record.faculty_id] = (summaryMap[record.faculty_id] || 0) + 1;
+        });
+      }
+      setFacultySummary(summaryMap);
+    } catch (error) {
+      console.error("Error fetching faculty summary:", error.message);
+    }
+  };
+
+  const handleFacultyDateChange = (e) => {
+    const selectedDate = e.target.value;
+    if (selectedDate > today) {
+      alert("You cannot mark attendance for future dates");
+    } else {
+      setFacultyDate(selectedDate);
+    }
+  };
+
+  const markFacultyAttendance = async (facultyId, status) => {
+    if (facultyDate > today) {
+      alert("You cannot mark attendance for future dates");
+      return;
+    }
+
+    try {
+      const existingRecord = facultyAttendanceData[facultyId];
+      
+      if (existingRecord) {
+        const { error } = await supabase
+          .from("faculty_attendance")
+          .update({ status: status })
+          .eq("id", existingRecord.id);
+          
+        if (error) throw error;
+        
+        setFacultyAttendanceData(prev => ({
+          ...prev,
+          [facultyId]: { ...existingRecord, status: status }
+        }));
+      } else {
+        const { data, error } = await supabase
+          .from("faculty_attendance")
+          .insert([{ faculty_id: facultyId, date: facultyDate, status: status }])
+          .select();
+          
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setFacultyAttendanceData(prev => ({
+            ...prev,
+            [facultyId]: data[0]
+          }));
+        } else {
+          fetchFacultyAttendance();
+        }
+      }
+      
+      setFacultyEditModes(prev => ({ ...prev, [facultyId]: false }));
+      fetchFacultySummary(); // Refresh summary
+    } catch (error) {
+      console.error("Error marking faculty attendance:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const renderFacultyAction = (facultyId) => {
+    const record = facultyAttendanceData[facultyId];
+    const isEditing = facultyEditModes[facultyId];
+    const actionAreaWidth = "180px";
+    
+    if (record) {
+      if (!isEditing) {
+        const isPresent = record.status === "Present";
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+            <div style={{ 
+              width: actionAreaWidth,
+              padding: "0.5rem 0", 
+              borderRadius: "4px", 
+              color: "white", 
+              fontWeight: "bold",
+              textAlign: "center",
+              background: isPresent ? "#4CAF50" : "#f44336" 
+            }}>
+              {record.status}
+            </div>
+            <button
+              onClick={() => setFacultyEditModes(prev => ({ ...prev, [facultyId]: true }))}
+              style={{ 
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "1.2rem",
+                padding: "0.2rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+              title="Edit Attendance"
+            >
+              ✏️
+            </button>
+          </div>
+        );
+      } else {
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
+            <select
+              value={record.status}
+              onChange={(e) => markFacultyAttendance(facultyId, e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                outline: "none",
+                cursor: "pointer",
+                fontSize: "1rem",
+                textAlign: "center"
+              }}
+            >
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+            </select>
+          </div>
+        );
+      }
+    }
+
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: actionAreaWidth, margin: "auto" }}>
+        <button
+          onClick={() => markFacultyAttendance(facultyId, "Present")}
+          style={{ flex: 1, padding: "0.5rem 0", background: "#4CAF50", color: "white", cursor: "pointer", border: "none", borderRadius: "4px" }}
+        >
+          Present
+        </button>
+        <button
+          onClick={() => markFacultyAttendance(facultyId, "Absent")}
+          style={{ flex: 1, padding: "0.5rem 0", background: "#f44336", color: "white", cursor: "pointer", border: "none", borderRadius: "4px" }}
+        >
+          Absent
+        </button>
+      </div>
+    );
+  };
 
   const generateRandomPassword = () => {
     // Generates a random 8-character string for the temporary password
@@ -202,6 +426,61 @@ const AdminDashboard = () => {
             {loading ? "Creating User & Sending Email..." : "Create User"}
           </button>
         </form>
+      </div>
+
+      <hr style={{ margin: "3rem 0", border: "none", borderTop: "1px solid #eee" }} />
+
+      <div style={{ marginTop: "2rem", background: "#f9f9f9", padding: "2rem", borderRadius: "8px" }}>
+        <h3>Faculty Attendance</h3>
+        <p>Mark and view attendance for all faculty members.</p>
+
+        <div style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
+          <label style={{ fontWeight: "bold" }}>
+            Select Date:{" "}
+            <input
+              type="date"
+              value={facultyDate}
+              onChange={handleFacultyDateChange}
+              max={today}
+              style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
+            />
+          </label>
+        </div>
+
+        {facLoading ? (
+          <p>Loading faculties...</p>
+        ) : faculties.length > 0 ? (
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem", background: "white", borderRadius: "8px", overflow: "hidden" }}>
+            <thead>
+              <tr style={{ background: "#2196F3", color: "white", textAlign: "left" }}>
+                <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Faculty Name</th>
+                <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Mark Attendance</th>
+                <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Summary (Current Month)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {faculties.map((faculty) => {
+                const presentDays = facultySummary[faculty.id] || 0;
+
+                return (
+                  <tr key={faculty.id} style={{ borderBottom: "1px solid #ddd" }}>
+                    <td style={{ padding: "1rem", fontWeight: "bold", color: "#333" }}>{faculty.name}</td>
+                    <td style={{ padding: "1rem", textAlign: "center" }}>
+                      {renderFacultyAction(faculty.id)}
+                    </td>
+                    <td style={{ padding: "1rem", textAlign: "center", fontWeight: "bold" }}>
+                      {presentDays} / {daysInCurrentMonthPassed}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "white", borderRadius: "8px" }}>
+            No faculty found in the database.
+          </p>
+        )}
       </div>
     </div>
   );

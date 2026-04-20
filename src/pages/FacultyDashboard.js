@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import ViewAttendance from "../components/ViewAttendance";
 
 const FacultyDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -9,6 +10,7 @@ const FacultyDashboard = () => {
   const [editModes, setEditModes] = useState({});
   const [facultyStandard, setFacultyStandard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("mark");
   const [message, setMessage] = useState("");
 
   const handleDateChange = (e) => {
@@ -252,6 +254,7 @@ const FacultyDashboard = () => {
     );
   };
 
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -264,67 +267,82 @@ const FacultyDashboard = () => {
     <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
         <h2>Faculty Dashboard</h2>
-        <button onClick={handleLogout} style={{ padding: "0.5rem 1rem", cursor: "pointer", background: "#f44336", color: "white", border: "none", borderRadius: "4px" }}>
-          Logout
-        </button>
+        <div>
+          <button 
+            onClick={() => setActiveTab(activeTab === "mark" ? "view" : "mark")} 
+            style={{ padding: "0.5rem 1rem", cursor: "pointer", background: activeTab === "mark" ? "#2196F3" : "#4CAF50", color: "white", border: "none", borderRadius: "4px", marginRight: "1rem" }}
+          >
+            {activeTab === "mark" ? "View Attendance Records" : "Mark Attendance"}
+          </button>
+          <button onClick={handleLogout} style={{ padding: "0.5rem 1rem", cursor: "pointer", background: "#f44336", color: "white", border: "none", borderRadius: "4px" }}>
+            Logout
+          </button>
+        </div>
       </header>
       
       <div style={{ marginTop: "2rem" }}>
-        <h3>Mark Attendance</h3>
-        <div style={{ marginBottom: "1.5rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
-          <label style={{ fontWeight: "bold" }}>
-            Select Date:{" "}
-            <input
-              type="date"
-              value={date}
-              onChange={handleDateChange}
-              max={today}
-              style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
-            />
-          </label>
-        </div>
-        
-        {message && (
-          <div style={{ 
-            padding: "1rem", 
-            marginBottom: "1rem", 
-            borderRadius: "4px",
-            background: message.includes("Error") ? "#ffcccc" : "#d4edda",
-            color: message.includes("Error") ? "red" : "green",
-            textAlign: "center",
-            fontWeight: "bold"
-          }}>
-            {message}
-          </div>
-        )}
-
-        {students.length > 0 ? (
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
-            <thead>
-              <tr style={{ background: "#4CAF50", color: "white", textAlign: "left" }}>
-                <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Student Name</th>
-                <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Email</th>
-                <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student.id} style={{ borderBottom: "1px solid #ddd" }}>
-                  <td style={{ padding: "1rem" }}>{student.name}</td>
-                  <td style={{ padding: "1rem" }}>{student.email}</td>
-                  <td style={{ padding: "1rem", textAlign: "center" }}>
-                    {renderAction(student.id)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {activeTab === "view" ? (
+          <ViewAttendance students={students} />
         ) : (
-          <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "#f9f9f9", borderRadius: "8px" }}>
-            No students found in the database.
-          </p>
+          <>
+            <h3>Mark Attendance</h3>
+            <div style={{ marginBottom: "1.5rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
+              <label style={{ fontWeight: "bold" }}>
+                Select Date:{" "}
+                <input
+                  type="date"
+                  value={date}
+                  onChange={handleDateChange}
+                  max={today}
+                  style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
+                />
+              </label>
+            </div>
+            
+            {message && (
+              <div style={{ 
+                padding: "1rem", 
+                marginBottom: "1rem", 
+                borderRadius: "4px",
+                background: message.includes("Error") ? "#ffcccc" : "#d4edda",
+                color: message.includes("Error") ? "red" : "green",
+                textAlign: "center",
+                fontWeight: "bold"
+              }}>
+                {message}
+              </div>
+            )}
+
+            {students.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
+                <thead>
+                  <tr style={{ background: "#4CAF50", color: "white", textAlign: "left" }}>
+                    <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Student Name</th>
+                    <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Email</th>
+                    <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student.id} style={{ borderBottom: "1px solid #ddd" }}>
+                      <td style={{ padding: "1rem" }}>{student.name}</td>
+                      <td style={{ padding: "1rem" }}>{student.email}</td>
+                      <td style={{ padding: "1rem", textAlign: "center" }}>
+                        {renderAction(student.id)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "#f9f9f9", borderRadius: "8px" }}>
+                No students found in the database.
+              </p>
+            )}
+          </>
         )}
       </div>
+
     </div>
   );
 };
