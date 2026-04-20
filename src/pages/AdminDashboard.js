@@ -160,36 +160,19 @@ const AdminDashboard = () => {
   const renderFacultyAction = (facultyId) => {
     const record = facultyAttendanceData[facultyId];
     const isEditing = facultyEditModes[facultyId];
-    const actionAreaWidth = "180px";
+    const actionAreaWidth = "200px";
     
     if (record) {
       if (!isEditing) {
         const isPresent = record.status === "Present";
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-            <div style={{ 
-              width: actionAreaWidth,
-              padding: "0.5rem 0", 
-              borderRadius: "4px", 
-              color: "white", 
-              fontWeight: "bold",
-              textAlign: "center",
-              background: isPresent ? "#4CAF50" : "#f44336" 
-            }}>
+          <div className="flex items-center gap-05" style={{ justifyContent: "center" }}>
+            <div className={`badge ${isPresent ? 'badge-success' : 'badge-danger'}`} style={{ width: "120px" }}>
               {record.status}
             </div>
             <button
               onClick={() => setFacultyEditModes(prev => ({ ...prev, [facultyId]: true }))}
-              style={{ 
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "1.2rem",
-                padding: "0.2rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
+              className="btn-icon"
               title="Edit Attendance"
             >
               ✏️
@@ -198,20 +181,12 @@ const AdminDashboard = () => {
         );
       } else {
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
+          <div className="flex items-center" style={{ justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
             <select
               value={record.status}
               onChange={(e) => markFacultyAttendance(facultyId, e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                outline: "none",
-                cursor: "pointer",
-                fontSize: "1rem",
-                textAlign: "center"
-              }}
+              className="input-field text-center"
+              style={{ padding: "0.4rem" }}
             >
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
@@ -222,16 +197,18 @@ const AdminDashboard = () => {
     }
 
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: actionAreaWidth, margin: "auto" }}>
+      <div className="flex items-center gap-05" style={{ justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
         <button
           onClick={() => markFacultyAttendance(facultyId, "Present")}
-          style={{ flex: 1, padding: "0.5rem 0", background: "#4CAF50", color: "white", cursor: "pointer", border: "none", borderRadius: "4px" }}
+          className="btn btn-success"
+          style={{ flex: 1 }}
         >
           Present
         </button>
         <button
           onClick={() => markFacultyAttendance(facultyId, "Absent")}
-          style={{ flex: 1, padding: "0.5rem 0", background: "#f44336", color: "white", cursor: "pointer", border: "none", borderRadius: "4px" }}
+          className="btn btn-danger"
+          style={{ flex: 1 }}
         >
           Absent
         </button>
@@ -333,74 +310,68 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
+    <div className="app-container">
+      <header className="navbar">
         <h2>Admin Dashboard</h2>
-        <button onClick={handleLogout} style={{ padding: "0.5rem 1rem", cursor: "pointer", background: "#f44336", color: "white", border: "none", borderRadius: "4px" }}>
+        <button onClick={handleLogout} className="btn btn-danger">
           Logout
         </button>
       </header>
       
-      <div style={{ marginTop: "2rem", background: "#f9f9f9", padding: "2rem", borderRadius: "8px" }}>
-        <h3>Create New User</h3>
-        <p>Add new students or faculty to the system.</p>
+      <div className="card">
+        <h3 className="section-title">Create New User</h3>
+        <p className="section-subtitle">Add new students or faculty to the system.</p>
         
         {message && (
-          <div style={{ 
-            padding: "1rem", 
-            marginBottom: "1rem", 
-            borderRadius: "4px",
-            background: message.includes("Error") ? "#ffcccc" : "#d4edda",
-            color: message.includes("Error") ? "red" : "green"
-          }}>
+          <div className={message.includes("Error") ? "alert alert-danger" : "alert alert-success"}>
             {message}
           </div>
         )}
 
-        <form onSubmit={handleCreateUser} style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
-          <div>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>Full Name</label>
+        <form onSubmit={handleCreateUser}>
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
             <input 
               type="text" 
+              className="input-field"
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               required 
-              style={{ width: "100%", padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }} 
             />
           </div>
           
-          <div>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>Email Address</label>
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
             <input 
               type="email" 
+              className="input-field"
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              style={{ width: "100%", padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }} 
             />
           </div>
           
           {/* Password field is removed since it's generated dynamically */}
           
-          <div>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>Role</label>
+          <div className="form-group">
+            <label className="form-label">Role</label>
             <select 
               value={role} 
               onChange={(e) => setRole(e.target.value)} 
-              style={{ width: "100%", padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+              className="input-field"
             >
               <option value="student">Student</option>
               <option value="faculty">Faculty</option>
             </select>
           </div>
           
-          <div>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>Standard</label>
+          <div className="form-group">
+            <label className="form-label">Standard</label>
             <select 
               value={standard} 
               onChange={(e) => setStandard(e.target.value)} 
               required
-              style={{ width: "100%", padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+              className="input-field"
             >
               <option value="" disabled>Select Standard</option>
               {[...Array(12)].map((_, i) => (
@@ -411,75 +382,69 @@ const AdminDashboard = () => {
           
           <button 
             type="submit" 
+            className="btn btn-success w-full"
             disabled={loading}
-            style={{ 
-              padding: "1rem", 
-              cursor: loading ? "not-allowed" : "pointer", 
-              background: "#4CAF50", 
-              color: "white", 
-              border: "none", 
-              borderRadius: "4px",
-              fontWeight: "bold",
-              marginTop: "1rem"
-            }}
           >
             {loading ? "Creating User & Sending Email..." : "Create User"}
           </button>
         </form>
       </div>
 
-      <hr style={{ margin: "3rem 0", border: "none", borderTop: "1px solid #eee" }} />
+      <hr className="divider" />
 
-      <div style={{ marginTop: "2rem", background: "#f9f9f9", padding: "2rem", borderRadius: "8px" }}>
-        <h3>Faculty Attendance</h3>
-        <p>Mark and view attendance for all faculty members.</p>
+      <div className="card">
+        <h3 className="section-title">Faculty Attendance</h3>
+        <p className="section-subtitle">Mark and view attendance for all faculty members.</p>
 
-        <div style={{ marginBottom: "1.5rem", marginTop: "1.5rem" }}>
-          <label style={{ fontWeight: "bold" }}>
-            Select Date:{" "}
-            <input
-              type="date"
-              value={facultyDate}
-              onChange={handleFacultyDateChange}
-              max={today}
-              style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
-            />
+        <div className="form-group flex items-center">
+          <label className="form-label" style={{ marginBottom: 0, marginRight: "1rem" }}>
+            Select Date:
           </label>
+          <input
+            type="date"
+            className="input-field"
+            style={{ width: "auto" }}
+            value={facultyDate}
+            onChange={handleFacultyDateChange}
+            max={today}
+          />
         </div>
 
         {facLoading ? (
           <p>Loading faculties...</p>
         ) : faculties.length > 0 ? (
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem", background: "white", borderRadius: "8px", overflow: "hidden" }}>
-            <thead>
-              <tr style={{ background: "#2196F3", color: "white", textAlign: "left" }}>
-                <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Faculty Name</th>
-                <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Mark Attendance</th>
-                <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Summary (Current Month)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {faculties.map((faculty) => {
-                const presentDays = facultySummary[faculty.id] || 0;
+          <div className="table-container">
+            <table className="modern-table">
+              <thead>
+                <tr>
+                  <th>Faculty Name</th>
+                  <th className="text-center">Mark Attendance</th>
+                  <th className="text-center">Summary (Current Month)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {faculties.map((faculty) => {
+                  const presentDays = facultySummary[faculty.id] || 0;
 
-                return (
-                  <tr key={faculty.id} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: "1rem", fontWeight: "bold", color: "#333" }}>{faculty.name}</td>
-                    <td style={{ padding: "1rem", textAlign: "center" }}>
-                      {renderFacultyAction(faculty.id)}
-                    </td>
-                    <td style={{ padding: "1rem", textAlign: "center", fontWeight: "bold" }}>
-                      {presentDays} / {daysInCurrentMonthPassed}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr key={faculty.id}>
+                      <td className="font-bold">{faculty.name}</td>
+                      <td className="text-center">
+                        {renderFacultyAction(faculty.id)}
+                      </td>
+                      <td className="text-center font-bold">
+                        {presentDays} / {daysInCurrentMonthPassed}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "white", borderRadius: "8px" }}>
+          <div className="empty-state">
             No faculty found in the database.
-          </p>
+          </div>
         )}
       </div>
     </div>

@@ -109,51 +109,39 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
+    <div className="app-container">
+      <header className="navbar">
         <h2>Welcome, {userName || "Student"}</h2>
-        <button onClick={handleLogout} style={{ padding: "0.5rem 1rem", cursor: "pointer", background: "#f44336", color: "white", border: "none", borderRadius: "4px" }}>
+        <button onClick={handleLogout} className="btn btn-danger">
           Logout
         </button>
       </header>
       
-      <div style={{ marginTop: "2rem" }}>
-        <div style={{ 
-          display: "flex", 
-          justifyContent: "space-between", 
-          alignItems: "center",
-          background: "#f9f9f9", 
-          padding: "1.5rem", 
-          borderRadius: "8px",
-          marginBottom: "2rem"
-        }}>
+      <div>
+        <div className="card flex flex-between items-center">
           <div>
-            <h3 style={{ margin: 0, color: "#333" }}>Overall Attendance</h3>
-            <p style={{ margin: "0.5rem 0 0 0", color: "#666" }}>Total Classes Recorded: {attendance.length}</p>
+            <h3 className="section-title">Overall Attendance</h3>
+            <p className="section-subtitle" style={{ marginBottom: 0 }}>Total Classes Recorded: {attendance.length}</p>
           </div>
           <div style={{ 
             fontSize: "2rem", 
             fontWeight: "bold",
-            color: percentage >= 75 ? "#4CAF50" : "#f44336"
+            color: percentage >= 75 ? "var(--success-color)" : "var(--danger-color)"
           }}>
             {percentage.toFixed(1)}%
           </div>
         </div>
 
         {percentage < 75 && attendance.length > 0 && (
-          <div style={{ 
-            background: "#ffebee", 
-            borderLeft: "5px solid #f44336",
-            padding: "1rem", 
-            marginBottom: "2rem", 
-            borderRadius: "4px" 
-          }}>
-            <strong style={{ color: "#d32f2f" }}>⚠️ Warning:</strong> Your attendance is below the 75% requirement. Please ensure you attend the upcoming classes.
+          <div className="alert alert-danger" style={{ borderLeft: "5px solid var(--danger-color)", textAlign: "left" }}>
+            <strong>⚠️ Warning:</strong> Your attendance is below the 75% requirement. Please ensure you attend the upcoming classes.
           </div>
         )}
         
-        <h3>Attendance History</h3>
-        <AttendancePage attendanceData={attendance} />
+        <div className="card">
+          <h3 className="section-title">Attendance History</h3>
+          <AttendancePage attendanceData={attendance} />
+        </div>
       </div>
     </div>
   );

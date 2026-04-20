@@ -35,58 +35,55 @@ const ViewAttendance = ({ students }) => {
   };
 
   return (
-    <div>
-      <h3>View Attendance Records</h3>
-      <div style={{ marginBottom: "1.5rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px", display: "flex", alignItems: "center", gap: "1rem" }}>
-        <label style={{ fontWeight: "bold" }}>
-          Select Date:{" "}
-          <input
-            type="date"
-            value={viewDate}
-            onChange={(e) => setViewDate(e.target.value)}
-            max={today}
-            style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
-          />
+    <div className="card">
+      <h3 className="section-title">View Attendance Records</h3>
+      <div className="form-group flex items-center gap-1" style={{ marginTop: "1.5rem", marginBottom: "1.5rem" }}>
+        <label className="form-label" style={{ marginBottom: 0 }}>
+          Select Date:
         </label>
+        <input
+          type="date"
+          className="input-field"
+          style={{ width: "auto" }}
+          value={viewDate}
+          onChange={(e) => setViewDate(e.target.value)}
+          max={today}
+        />
         <button
           onClick={handleViewAttendance}
-          style={{ padding: "0.5rem 1rem", background: "#2196F3", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+          className="btn btn-primary"
         >
           View Attendance
         </button>
       </div>
 
       {viewRecords.length > 0 ? (
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
-          <thead>
-            <tr style={{ background: "#2196F3", color: "white", textAlign: "left" }}>
-              <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Student Name</th>
-              <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {viewRecords.map((record) => (
-              <tr key={record.id} style={{ borderBottom: "1px solid #ddd" }}>
-                <td style={{ padding: "1rem" }}>{record.studentName}</td>
-                <td style={{ padding: "1rem", textAlign: "center" }}>
-                  <span style={{ 
-                    padding: "0.25rem 0.75rem", 
-                    borderRadius: "12px", 
-                    color: "white", 
-                    fontWeight: "bold",
-                    background: record.status === "Present" ? "#4CAF50" : "#f44336" 
-                  }}>
-                    {record.status}
-                  </span>
-                </td>
+        <div className="table-container">
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th className="text-center">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {viewRecords.map((record) => (
+                <tr key={record.id}>
+                  <td className="font-bold">{record.studentName}</td>
+                  <td className="text-center">
+                    <span className={`badge ${record.status === "Present" ? "badge-success" : "badge-danger"}`}>
+                      {record.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "#f9f9f9", borderRadius: "8px" }}>
+        <div className="empty-state">
           No records found. Select a date and click "View Attendance".
-        </p>
+        </div>
       )}
     </div>
   );

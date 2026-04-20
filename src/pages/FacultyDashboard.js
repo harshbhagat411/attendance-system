@@ -158,59 +158,33 @@ const FacultyDashboard = () => {
   const renderAction = (studentId) => {
     const record = attendanceData[studentId];
     const isEditing = editModes[studentId];
-    
-    const actionAreaWidth = "180px";
+    const actionAreaWidth = "200px";
     
     if (record) {
       if (!isEditing) {
         const isPresent = record.status === "Present";
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-            <div style={{ 
-              width: actionAreaWidth,
-              padding: "0.5rem 0", 
-              borderRadius: "4px", 
-              color: "white", 
-              fontWeight: "bold",
-              textAlign: "center",
-              background: isPresent ? "#4CAF50" : "#f44336" 
-            }}>
+          <div className="flex items-center gap-05" style={{ justifyContent: "center" }}>
+            <div className={`badge ${isPresent ? 'badge-success' : 'badge-danger'}`} style={{ width: "120px" }}>
               {record.status}
             </div>
             <button
               onClick={() => setEditModes(prev => ({ ...prev, [studentId]: true }))}
-              style={{ 
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "1.2rem",
-                padding: "0.2rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
+              className="btn-icon"
               title="Edit Attendance"
             >
-              🖋️
+              ✏️
             </button>
           </div>
         );
       } else {
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
+          <div className="flex items-center" style={{ justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
             <select
               value={record.status}
               onChange={(e) => markAttendance(studentId, e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                outline: "none",
-                cursor: "pointer",
-                fontSize: "1rem",
-                textAlign: "center"
-              }}
+              className="input-field text-center"
+              style={{ padding: "0.4rem" }}
             >
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
@@ -221,32 +195,18 @@ const FacultyDashboard = () => {
     }
 
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: actionAreaWidth, margin: "auto" }}>
+      <div className="flex items-center gap-05" style={{ justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
         <button
           onClick={() => markAttendance(studentId, "Present")}
-          style={{ 
-            flex: 1,
-            padding: "0.5rem 0", 
-            background: "#4CAF50", 
-            color: "white", 
-            cursor: "pointer",
-            border: "none",
-            borderRadius: "4px"
-          }}
+          className="btn btn-success"
+          style={{ flex: 1 }}
         >
           Present
         </button>
         <button
           onClick={() => markAttendance(studentId, "Absent")}
-          style={{ 
-            flex: 1,
-            padding: "0.5rem 0", 
-            background: "#f44336", 
-            color: "white", 
-            cursor: "pointer",
-            border: "none",
-            borderRadius: "4px"
-          }}
+          className="btn btn-danger"
+          style={{ flex: 1 }}
         >
           Absent
         </button>
@@ -264,82 +224,77 @@ const FacultyDashboard = () => {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
+    <div className="app-container">
+      <header className="navbar">
         <h2>Faculty Dashboard</h2>
-        <div>
+        <div className="nav-actions">
           <button 
             onClick={() => setActiveTab(activeTab === "mark" ? "view" : "mark")} 
-            style={{ padding: "0.5rem 1rem", cursor: "pointer", background: activeTab === "mark" ? "#2196F3" : "#4CAF50", color: "white", border: "none", borderRadius: "4px", marginRight: "1rem" }}
+            className={`btn ${activeTab === "mark" ? "btn-primary" : "btn-success"}`}
           >
             {activeTab === "mark" ? "View Attendance Records" : "Mark Attendance"}
           </button>
-          <button onClick={handleLogout} style={{ padding: "0.5rem 1rem", cursor: "pointer", background: "#f44336", color: "white", border: "none", borderRadius: "4px" }}>
+          <button onClick={handleLogout} className="btn btn-danger">
             Logout
           </button>
         </div>
       </header>
       
-      <div style={{ marginTop: "2rem" }}>
+      <div>
         {activeTab === "view" ? (
           <ViewAttendance students={students} />
         ) : (
-          <>
-            <h3>Mark Attendance</h3>
-            <div style={{ marginBottom: "1.5rem", background: "#f9f9f9", padding: "1rem", borderRadius: "8px" }}>
-              <label style={{ fontWeight: "bold" }}>
-                Select Date:{" "}
-                <input
-                  type="date"
-                  value={date}
-                  onChange={handleDateChange}
-                  max={today}
-                  style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
+          <div className="card">
+            <h3 className="section-title">Mark Attendance</h3>
+            <div className="form-group flex items-center" style={{ marginTop: "1.5rem" }}>
+              <label className="form-label" style={{ marginBottom: 0, marginRight: "1rem" }}>
+                Select Date:
               </label>
+              <input
+                type="date"
+                className="input-field"
+                style={{ width: "auto" }}
+                value={date}
+                onChange={handleDateChange}
+                max={today}
+              />
             </div>
             
             {message && (
-              <div style={{ 
-                padding: "1rem", 
-                marginBottom: "1rem", 
-                borderRadius: "4px",
-                background: message.includes("Error") ? "#ffcccc" : "#d4edda",
-                color: message.includes("Error") ? "red" : "green",
-                textAlign: "center",
-                fontWeight: "bold"
-              }}>
+              <div className={message.includes("Error") ? "alert alert-danger" : "alert alert-success"}>
                 {message}
               </div>
             )}
 
             {students.length > 0 ? (
-              <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
-                <thead>
-                  <tr style={{ background: "#4CAF50", color: "white", textAlign: "left" }}>
-                    <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Student Name</th>
-                    <th style={{ padding: "1rem", border: "1px solid #ddd" }}>Email</th>
-                    <th style={{ padding: "1rem", border: "1px solid #ddd", textAlign: "center" }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id} style={{ borderBottom: "1px solid #ddd" }}>
-                      <td style={{ padding: "1rem" }}>{student.name}</td>
-                      <td style={{ padding: "1rem" }}>{student.email}</td>
-                      <td style={{ padding: "1rem", textAlign: "center" }}>
-                        {renderAction(student.id)}
-                      </td>
+              <div className="table-container">
+                <table className="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Email</th>
+                      <th className="text-center">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {students.map((student) => (
+                      <tr key={student.id}>
+                        <td className="font-bold">{student.name}</td>
+                        <td className="text-muted">{student.email}</td>
+                        <td className="text-center">
+                          {renderAction(student.id)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
-              <p style={{ textAlign: "center", color: "#666", padding: "2rem", background: "#f9f9f9", borderRadius: "8px" }}>
+              <div className="empty-state">
                 No students found in the database.
-              </p>
+              </div>
             )}
-          </>
+          </div>
         )}
       </div>
 

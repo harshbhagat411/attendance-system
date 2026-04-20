@@ -79,50 +79,58 @@ const Login = ({ session, role }) => {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "400px", margin: "auto", marginTop: "10vh" }}>
-      <h2 style={{ textAlign: "center" }}>Attendance System Login</h2>
-      
-      {error && (
-        <div style={{ background: "#ffcccc", color: "red", padding: "1rem", borderRadius: "4px", marginBottom: "1rem" }}>
-          {error}
-        </div>
-      )}
-      
-      <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <input
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc" }}
-        />
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh',
+      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+      padding: '2rem'
+    }}>
+      <div className="card" style={{ width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+        <h2 className="section-title text-center" style={{ marginBottom: "2rem" }}>Attendance System</h2>
         
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc" }}
-        />
+        {error && (
+          <div className="alert alert-danger">
+            {error}
+          </div>
+        )}
         
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={{ 
-            padding: "0.8rem", 
-            cursor: loading ? "not-allowed" : "pointer", 
-            background: "#007bff", 
-            color: "white", 
-            border: "none", 
-            borderRadius: "4px",
-            fontWeight: "bold"
-          }}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input
+              type="email"
+              className="input-field"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="input-field"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className="btn btn-primary w-full"
+            disabled={loading}
+            style={{ padding: "0.8rem", marginTop: "0.5rem" }}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
