@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import AttendancePage from "./AttendancePage";
+import emailjs from "emailjs-com";
 
 const StudentDashboard = () => {
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [percentage, setPercentage] = useState(0);
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
+    // Initialize emailjs with your public key
+    emailjs.init("qcIvatr_Xi9iB-_HS");
     fetchStudentData();
   }, []);
+
+  // Use an effect to watch when percentage drops below 75% and trigger email
+  useEffect(() => {
+    if (!loading && percentage < 75 && attendance.length > 0 && !emailSent && userName && userEmail) {
+      sendAlertEmail(userName, userEmail, percentage);
+    }
+  }, [percentage, attendance, loading, emailSent, userName, userEmail]);
 
   const fetchStudentData = async () => {
     try {
@@ -18,6 +30,8 @@ const StudentDashboard = () => {
       if (authError) throw authError;
       
       if (user) {
+        setUserEmail(user.email); // Store the student's email for EmailJS
+        
         // Fetch user name
         const { data: userData } = await supabase
           .from("users")
@@ -54,13 +68,36 @@ const StudentDashboard = () => {
       return;
     }
     
-    // Convert multiple entries per day to unique days if necessary, 
-    // but for simple calculation we just count records.
     const presentCount = records.filter((r) => r.status === "Present").length;
     const total = records.length;
     const calcPercentage = (presentCount / total) * 100;
     
     setPercentage(calcPercentage);
+  };
+
+  const sendAlertEmail = async (studentName, studentEmail, currentPercentage) => {
+    try {
+      // Set to true immediately to prevent duplicate sends during async call
+      setEmailSent(true);
+
+      const templateParams = {
+        name: studentName,
+        email: studentEmail, // This ensures EmailJS knows where to send it!
+        attendance: currentPercentage.toFixed(1)
+      };
+
+      await emailjs.send(
+        "service_6oztqhv",
+        "template_k3cncx9",
+        templateParams
+      );
+      
+      console.log("Alert email sent successfully to", studentEmail);
+    } catch (error) {
+      // Revert if there was an error so it can be retried if needed
+      setEmailSent(false);
+      console.error("Alert email failed to send:", error);
+    }
   };
 
   const handleLogout = async () => {

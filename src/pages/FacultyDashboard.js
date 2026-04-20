@@ -3,20 +3,89 @@ import { supabase } from "../supabaseClient";
 
 const FacultyDashboard = () => {
   const [students, setStudents] = useState([]);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const [date, setDate] = useState(today);
+  const [attendanceData, setAttendanceData] = useState({});
+  const [editModes, setEditModes] = useState({});
+  const [facultyStandard, setFacultyStandard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    if (selectedDate > today) {
+      alert("You cannot mark attendance for future dates");
+    } else {
+      setDate(selectedDate);
+    }
+  };
+
   useEffect(() => {
-    fetchStudents();
+    fetchFacultyDetails();
   }, []);
 
-  const fetchStudents = async () => {
+  useEffect(() => {
+    if (students.length > 0) {
+      fetchAttendance();
+    }
+  }, [date, students]);
+
+  const fetchFacultyDetails = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("standard")
+          .eq("id", user.id)
+          .single();
+          
+        if (error) throw error;
+        setFacultyStandard(data.standard);
+        
+        if (data.standard) {
+          fetchStudents(data.standard);
+        } else {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching faculty details:", error.message);
+      setLoading(false);
+    }
+  };
+
+  const fetchAttendance = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("date", date);
+      
+      if (error) throw error;
+      
+      const attendanceMap = {};
+      if (data) {
+        data.forEach(record => {
+          attendanceMap[record.student_id] = record;
+        });
+      }
+      setAttendanceData(attendanceMap);
+    } catch (error) {
+      console.error("Error fetching attendance:", error.message);
+    }
+  };
+
+  const fetchStudents = async (standard) => {
+    if (!standard) return;
     try {
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("role", "student")
+        .eq("standard", standard)
         .order("name");
 
       if (error) throw error;
@@ -29,24 +98,158 @@ const FacultyDashboard = () => {
   };
 
   const markAttendance = async (studentId, status) => {
-    try {
-      // Upsert: updating attendance if already marked for that day
-      // Note: for a simple insert without checking duplicates:
-      const { error } = await supabase.from("attendance").insert([
-        {
-          student_id: studentId,
-          date: date,
-          status: status,
-        },
-      ]);
+    if (date > today) {
+      alert("You cannot mark attendance for future dates");
+      return;
+    }
 
-      if (error) throw error;
+    try {
+      const existingRecord = attendanceData[studentId];
+      
+      if (existingRecord) {
+        // Update existing record
+        const { error } = await supabase
+          .from("attendance")
+          .update({ status: status })
+          .eq("id", existingRecord.id);
+          
+        if (error) throw error;
+        
+        setAttendanceData(prev => ({
+          ...prev,
+          [studentId]: { ...existingRecord, status: status }
+        }));
+      } else {
+        // Insert new record
+        const { data, error } = await supabase
+          .from("attendance")
+          .insert([
+            {
+              student_id: studentId,
+              date: date,
+              status: status,
+            },
+          ])
+          .select();
+          
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setAttendanceData(prev => ({
+            ...prev,
+            [studentId]: data[0]
+          }));
+        } else {
+          fetchAttendance(); // Fallback if no data returned
+        }
+      }
+      
+      setEditModes(prev => ({ ...prev, [studentId]: false }));
       
       setMessage(`Marked ${status} successfully!`);
       setTimeout(() => setMessage(""), 2000);
     } catch (error) {
       setMessage(`Error: ${error.message}`);
     }
+  };
+
+  const renderAction = (studentId) => {
+    const record = attendanceData[studentId];
+    const isEditing = editModes[studentId];
+    
+    const actionAreaWidth = "180px";
+    
+    if (record) {
+      if (!isEditing) {
+        const isPresent = record.status === "Present";
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+            <div style={{ 
+              width: actionAreaWidth,
+              padding: "0.5rem 0", 
+              borderRadius: "4px", 
+              color: "white", 
+              fontWeight: "bold",
+              textAlign: "center",
+              background: isPresent ? "#4CAF50" : "#f44336" 
+            }}>
+              {record.status}
+            </div>
+            <button
+              onClick={() => setEditModes(prev => ({ ...prev, [studentId]: true }))}
+              style={{ 
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "1.2rem",
+                padding: "0.2rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+              title="Edit Attendance"
+            >
+              🖋️
+            </button>
+          </div>
+        );
+      } else {
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: actionAreaWidth, margin: "auto" }}>
+            <select
+              value={record.status}
+              onChange={(e) => markAttendance(studentId, e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                outline: "none",
+                cursor: "pointer",
+                fontSize: "1rem",
+                textAlign: "center"
+              }}
+            >
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+            </select>
+          </div>
+        );
+      }
+    }
+
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: actionAreaWidth, margin: "auto" }}>
+        <button
+          onClick={() => markAttendance(studentId, "Present")}
+          style={{ 
+            flex: 1,
+            padding: "0.5rem 0", 
+            background: "#4CAF50", 
+            color: "white", 
+            cursor: "pointer",
+            border: "none",
+            borderRadius: "4px"
+          }}
+        >
+          Present
+        </button>
+        <button
+          onClick={() => markAttendance(studentId, "Absent")}
+          style={{ 
+            flex: 1,
+            padding: "0.5rem 0", 
+            background: "#f44336", 
+            color: "white", 
+            cursor: "pointer",
+            border: "none",
+            borderRadius: "4px"
+          }}
+        >
+          Absent
+        </button>
+      </div>
+    );
   };
 
   const handleLogout = async () => {
@@ -74,7 +277,8 @@ const FacultyDashboard = () => {
             <input
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={handleDateChange}
+              max={today}
               style={{ padding: "0.5rem", marginLeft: "1rem", borderRadius: "4px", border: "1px solid #ccc" }}
             />
           </label>
@@ -109,33 +313,7 @@ const FacultyDashboard = () => {
                   <td style={{ padding: "1rem" }}>{student.name}</td>
                   <td style={{ padding: "1rem" }}>{student.email}</td>
                   <td style={{ padding: "1rem", textAlign: "center" }}>
-                    <button
-                      onClick={() => markAttendance(student.id, "Present")}
-                      style={{ 
-                        marginRight: "0.5rem", 
-                        padding: "0.5rem 1rem", 
-                        background: "#4CAF50", 
-                        color: "white", 
-                        cursor: "pointer",
-                        border: "none",
-                        borderRadius: "4px"
-                      }}
-                    >
-                      Present
-                    </button>
-                    <button
-                      onClick={() => markAttendance(student.id, "Absent")}
-                      style={{ 
-                        padding: "0.5rem 1rem", 
-                        background: "#f44336", 
-                        color: "white", 
-                        cursor: "pointer",
-                        border: "none",
-                        borderRadius: "4px"
-                      }}
-                    >
-                      Absent
-                    </button>
+                    {renderAction(student.id)}
                   </td>
                 </tr>
               ))}
