@@ -13,7 +13,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     // Initialize emailjs with your public key
-    emailjs.init("qcIvatr_Xi9iB-_HS");
+    emailjs.init("2Tz2HIRHn5-2jaLxY");
     fetchStudentData();
   }, []);
 
@@ -87,9 +87,10 @@ const StudentDashboard = () => {
       };
 
       await emailjs.send(
-        "service_6oztqhv",
+        "service_5brvsmf",
         "template_k3cncx9",
-        templateParams
+        templateParams,
+        "2Tz2HIRHn5-2jaLxY"
       );
       
       console.log("Alert email sent successfully to", studentEmail);

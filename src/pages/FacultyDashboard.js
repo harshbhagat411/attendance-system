@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import ViewAttendance from "../components/ViewAttendance";
+import emailjs from "emailjs-com";
 
 const FacultyDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -150,8 +151,75 @@ const FacultyDashboard = () => {
       
       setMessage(`Marked ${status} successfully!`);
       setTimeout(() => setMessage(""), 2000);
+
+      if (status === "Absent") {
+        checkAndSendLowAttendanceEmail(studentId);
+      }
+
     } catch (error) {
       setMessage(`Error: ${error.message}`);
+    }
+  };
+
+  const checkAndSendLowAttendanceEmail = async (studentId) => {
+    try {
+      console.log(`Checking attendance for studentId: ${studentId}`);
+      // Fetch all attendance for this student
+      const { data: records, error } = await supabase
+        .from("attendance")
+        .select("status")
+        .eq("student_id", studentId);
+        
+      if (error) {
+        console.error("Supabase fetch error:", error);
+        throw error;
+      }
+      
+      console.log(`Fetched ${records?.length} attendance records for student ${studentId}`);
+      
+      if (records && records.length > 0) {
+        const presentCount = records.filter(r => r.status === "Present").length;
+        const total = records.length;
+        const percentage = (presentCount / total) * 100;
+        
+        console.log(`Present: ${presentCount}, Total: ${total}, Percentage: ${percentage}%`);
+        
+        if (percentage < 75) {
+          const student = students.find(s => s.id === studentId);
+          console.log(`Found student:`, student ? student.name : "Not found");
+          
+          if (student && student.email) {
+            console.log(`Initializing EmailJS and sending to ${student.email}...`);
+            emailjs.init("2Tz2HIRHn5-2jaLxY");
+            
+            const templateParams = {
+              name: student.name,
+              email: student.email,
+              attendance: percentage.toFixed(1)
+            };
+            
+            try {
+              const result = await emailjs.send(
+                "service_5brvsmf",
+                "template_k3cncx9",
+                templateParams,
+                "2Tz2HIRHn5-2jaLxY"
+              );
+              console.log(`EmailJS Success:`, result.text);
+              alert(`Low attendance alert sent to ${student.email}!`);
+            } catch (emailErr) {
+              console.error("EmailJS Send Error:", emailErr);
+              alert(`Failed to send email to ${student.email}. Check console.`);
+            }
+          } else {
+            console.log("Student object or email is missing");
+          }
+        } else {
+          console.log("Percentage is >= 75%, skipping email.");
+        }
+      }
+    } catch (err) {
+      console.error("Error checking/sending low attendance email:", err);
     }
   };
 
