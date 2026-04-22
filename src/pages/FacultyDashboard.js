@@ -294,7 +294,7 @@ const FacultyDashboard = () => {
   return (
     <div className="app-container">
       <header className="navbar">
-        <h2>Faculty Dashboard</h2>
+        <h2>Teacher's Dashboard</h2>
         <div className="nav-actions">
           <button 
             onClick={() => setActiveTab(activeTab === "mark" ? "view" : "mark")} 
