@@ -74,7 +74,7 @@ const AdminDashboard = () => {
       }
       setFacultyAttendanceData(attendanceMap);
     } catch (error) {
-      console.error("Error fetching faculty attendance:", error.message);
+      console.error("Error fetching Teacher's attendance:", error.message);
     }
   };
 
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
       }
       setFacultySummary(summaryMap);
     } catch (error) {
-      console.error("Error fetching faculty summary:", error.message);
+      console.error("Error fetching Teacher's summary:", error.message);
     }
   };
 
@@ -320,7 +320,7 @@ const AdminDashboard = () => {
       
       <div className="card">
         <h3 className="section-title">Create New User</h3>
-        <p className="section-subtitle">Add new students or faculty to the system.</p>
+        <p className="section-subtitle">Add new students or Teachers to the system.</p>
         
         {message && (
           <div className={message.includes("Error") ? "alert alert-danger" : "alert alert-success"}>
@@ -393,8 +393,8 @@ const AdminDashboard = () => {
       <hr className="divider" />
 
       <div className="card">
-        <h3 className="section-title">Faculty Attendance</h3>
-        <p className="section-subtitle">Mark and view attendance for all faculty members.</p>
+        <h3 className="section-title">Teacher's Attendance</h3>
+        <p className="section-subtitle">Mark and view attendance for all Teachers.</p>
 
         <div className="form-group flex items-center">
           <label className="form-label" style={{ marginBottom: 0, marginRight: "1rem" }}>
@@ -417,7 +417,7 @@ const AdminDashboard = () => {
             <table className="modern-table">
               <thead>
                 <tr>
-                  <th>Faculty Name</th>
+                  <th>Teacher's Name</th>
                   <th className="text-center">Mark Attendance</th>
                   <th className="text-center">Summary (Current Month)</th>
                 </tr>
